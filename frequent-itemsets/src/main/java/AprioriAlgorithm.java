@@ -69,7 +69,7 @@ public class AprioriAlgorithm {
         this.generateSingletons();
         this.computeFrequentSingletons();
 
-        log("Frequent singletons: ",this.frequentItemsets);
+        logList("Frequent singletons: ",this.frequentItemsets);
 
     }
 
@@ -168,9 +168,9 @@ public class AprioriAlgorithm {
 
         for(kItemsets=2; frequentItemsets.size() != 0; kItemsets++) {
 
+            // set a new threshold id the user has specified more than one
             if(this.stepThresholds.length > 1) {
                 double t = stepThresholds[1];
-
                 supportThreshold = (int) (numberOfBaskets*t);
             }
 
@@ -221,6 +221,8 @@ public class AprioriAlgorithm {
                     frequentItemsets.add(candidateItemsets.get(candidate));
                 }
             }
+
+            logList("Frequent itemsets of size "+kItemsets+": ",this.frequentItemsets);
         }
 
         return prevFrequentItemsets;
@@ -253,5 +255,24 @@ public class AprioriAlgorithm {
     public static void log(String info, Object toLog) {
         System.out.println(info);
         System.out.println(toLog);
+    }
+
+    /**
+     * utility log method
+     *
+     * @param info
+     * @param toLog
+     */
+    public static void logList(String info, List<int[]> toLog) {
+        System.out.println(info);
+        for (int[] item: toLog) {
+            String s = "";
+            for(int i=0; i< item.length; i++) {
+                s += " "+item[i];
+            }
+            System.out.print(s + " | ");
+        }
+        System.out.println();
+
     }
 }

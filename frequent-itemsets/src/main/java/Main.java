@@ -24,7 +24,7 @@ public class Main {
          * beware that, for example:
          * 500 frequent singletons genrate 124750 candidate doubletons
          */
-        double[] stepThresholds = {0.03, 0.008}; // 3% (step1) and 0.8% (step n>1) of all the baskets
+        double[] stepThresholds = {0.01}; // 3% (step1) and 0.8% (step n>1) of all the baskets
         // double[] stepThresholds = {0.02, 0.5};
 
         // if wrong args, exit
@@ -86,7 +86,6 @@ public class Main {
             System.out.print(s + " | ");
         }
         System.out.println();
-
 
     }
 }
