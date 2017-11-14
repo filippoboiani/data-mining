@@ -24,7 +24,7 @@ public class Main {
          * beware that, for example:
          * 500 frequent singletons genrate 124750 candidate doubletons
          */
-        double[] stepThresholds = {0.01}; // 3% (step1) and 0.8% (step n>1) of all the baskets
+        double[] stepThresholds = {0.015}; // 3% (step1) and 0.8% (step n>1) of all the baskets
         // double[] stepThresholds = {0.02, 0.5};
 
         // if wrong args, exit
@@ -43,17 +43,22 @@ public class Main {
         File inputFile = new File("input/"+fileName);
         log("ANALYSING FILE", inputFile);
 
+        long startTime = System.currentTimeMillis();
         // subproblem 1: find the frequent itemsets
         List<int []> frequentItemsets = new AprioriAlgorithm(stepThresholds, inputFile).findFrequentItemsets();
 
+        long endTime   = System.currentTimeMillis();
+        double totalTime = (endTime - startTime)/ 1000;
+
         // print the frequent itemsets
         logList("FREQUENT ITEMSETS FOUND:", frequentItemsets);
+        log("TIME (in sec): ", totalTime);
 
         // subproblem 2: find associations
         List associations = AprioriAlgorithm.findAssosiation(frequentItemsets);
 
         // print the associations
-        log("ASSOCIATIONS FOUND:", associations);
+        log("ASSOCIATIONS FOUND:", "<not implemented>");
     }
 
 

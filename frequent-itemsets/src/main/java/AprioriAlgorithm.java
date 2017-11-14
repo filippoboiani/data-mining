@@ -69,7 +69,7 @@ public class AprioriAlgorithm {
         this.generateSingletons();
         this.computeFrequentSingletons();
 
-        logList("Frequent singletons: ",this.frequentItemsets);
+        logList("Frequent singletons ("+this.frequentItemsets.size()+"): ",this.frequentItemsets);
 
     }
 
@@ -222,7 +222,7 @@ public class AprioriAlgorithm {
                 }
             }
 
-            logList("Frequent itemsets of size "+kItemsets+": ",this.frequentItemsets);
+            logList("Frequent itemsets of size "+kItemsets+" ("+this.frequentItemsets.size()+"):" ,this.frequentItemsets);
         }
 
         return prevFrequentItemsets;
