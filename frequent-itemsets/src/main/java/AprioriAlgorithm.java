@@ -1,18 +1,28 @@
+package main.java;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+
 /**
- * Created by filippoboiani on 13/11/2017.
+ * Apriori class.
+ *
+ * This class represent the Apriori algorithm seen in the paper.
+ * It offers two method:
+ * - findFrequentItemsets (in the provided input file)
+ * - findAssociations (within the frequent itemsets)
  */
 public class AprioriAlgorithm {
-
 
     /** the threshold to determine a frequent itemset */
     private int supportThreshold;
     private double[] stepThresholds;
+
+    /** the minimum confidence for association rules */
+    private final double minConfidence;
 
     /** number of items in the dataset */
     private int numberOfItems;
@@ -35,8 +45,8 @@ public class AprioriAlgorithm {
      * - key: int[] the itemset
      * - value: Integer the support
      * */
-    private List<int[]> frequentItemsets, prevFrequentItemsets,candidateItemsets;
-
+    private List<int[]> kFrequentItemsets, totalFrequentItemsets, candidateItemsets;
+    private Map<Integer, Integer> frequentItemsetSupports;
 
     /**
      * AprioriAlgorith constructor
@@ -44,14 +54,15 @@ public class AprioriAlgorithm {
      * @param s
      * @param fileToAnalyse
      */
-    public AprioriAlgorithm(double[] s, File fileToAnalyse) {
+    public AprioriAlgorithm(double[] s, double minConfidence, File fileToAnalyse) {
 
         // set attributes
         this.numberOfBaskets = 0;
         this.numberOfItems = 0;
         this.candidateItemsets = new ArrayList<>();
-        this.frequentItemsets = new ArrayList<>();
-        this.prevFrequentItemsets = new ArrayList<>();
+        this.kFrequentItemsets = new ArrayList<>();
+        this.totalFrequentItemsets = new ArrayList<>();
+        this.frequentItemsetSupports = new HashMap<>();
 
         // prepare the file
         this.prepareFile(fileToAnalyse);
@@ -59,20 +70,20 @@ public class AprioriAlgorithm {
         // set the threshold
         this.supportThreshold = (int) (numberOfBaskets*s[0]);
         this.stepThresholds = s;
+        this.minConfidence = minConfidence;
 
-        // TODO: remove this
+        // print out information
         log("Items: ", this.numberOfItems);
         log("Baskets: ", this.numberOfBaskets);
         log("Threshold: ", this.supportThreshold);
-
+        log("Min Confidence: ", this.minConfidence);
         // compute the first step: frequent singletons
         this.generateSingletons();
         this.computeFrequentSingletons();
 
-        logList("Frequent singletons ("+this.frequentItemsets.size()+"): ",this.frequentItemsets);
+        logList("Frequent singletons ("+this.kFrequentItemsets.size()+"): ",this.kFrequentItemsets);
 
     }
-
 
     /**
      * prepareFile function.
@@ -105,7 +116,6 @@ public class AprioriAlgorithm {
                 dataset.add(basket);
 
                 for(int item: basket) {
-
                     // set the number of items
                     if(numberOfItems<item+1) numberOfItems = item+1;
                 }
@@ -124,6 +134,7 @@ public class AprioriAlgorithm {
         }
     }
 
+    /** generate a list of candidate singletons */
     private void generateSingletons() {
 
         kItemsets = 1;
@@ -135,6 +146,7 @@ public class AprioriAlgorithm {
         }
     }
 
+    /** get the frequent singletons */
     private void computeFrequentSingletons() {
 
         // only the support for the singleton will be the full set of items
@@ -152,36 +164,38 @@ public class AprioriAlgorithm {
             }
         }
 
-        for(int candidate=0; candidate<support.length; candidate++) {
-            // if the support is greater than the threshold
-            if (support[candidate] >= supportThreshold) {
-                // put the itemset int the set of frequent itemset (the put will overwrite existing values)
-                frequentItemsets.add(candidateItemsets.get(candidate));
-            }
-        }
+        // iterate over the candidates to filter them
+        filterCandidates(support);
     }
 
+    /**
+     * find the frequent itemsets.
+     *
+     * The function follows the algorithm provided in the paper.
+     *
+     * @return list of frequent itemsets
+     */
     public List<int[]> findFrequentItemsets() {
 
-        // supports vector
+        // supports vector (used to count the frequences)
         int[] support;
 
-        for(kItemsets=2; frequentItemsets.size() != 0; kItemsets++) {
+        for(this.kItemsets=2; this.kFrequentItemsets.size() != 0; this.kItemsets++) {
 
-            // set a new threshold id the user has specified more than one
+            // set a new threshold id (if the user has specified more than one)
             if(this.stepThresholds.length > 1) {
                 double t = stepThresholds[1];
-                supportThreshold = (int) (numberOfBaskets*t);
+                this.supportThreshold = (int) (this.numberOfBaskets*t);
             }
 
             // generate the set of candidates
-            candidateItemsets = aprioriGen(this.frequentItemsets);
+            this.candidateItemsets = aprioriGen(this.kFrequentItemsets);
 
-            // instanciate the supports vector
-            support = new int[candidateItemsets.size()];
+            // instantiate the supports vector
+            support = new int[this.candidateItemsets.size()];
 
             // iterate over the dataset
-            Iterator<int[]> basketsIterator = dataset.iterator();
+            Iterator<int[]> basketsIterator = this.dataset.iterator();
 
             while(basketsIterator.hasNext()) {
 
@@ -210,39 +224,129 @@ public class AprioriAlgorithm {
                 }
             }
 
-            prevFrequentItemsets = frequentItemsets;
-            frequentItemsets = new ArrayList<>();
+            totalFrequentItemsets.addAll(this.kFrequentItemsets);
+            this.kFrequentItemsets = new ArrayList<>();
 
             // filter the candidates
-            for(int candidate=0; candidate<support.length; candidate++) {
-                // if the support is greater than the threshold
-                if (support[candidate] >= supportThreshold) {
-                    // put the itemset int the set of frequent itemset (the put will overwrite existing values)
-                    frequentItemsets.add(candidateItemsets.get(candidate));
-                }
-            }
+            filterCandidates(support);
 
-            logList("Frequent itemsets of size "+kItemsets+" ("+this.frequentItemsets.size()+"):" ,this.frequentItemsets);
+            logList("Frequent itemsets of size "+kItemsets+" ("+this.kFrequentItemsets.size()+"):" ,this.kFrequentItemsets);
         }
+        return totalFrequentItemsets;
+    }
 
-        return prevFrequentItemsets;
+
+    /**
+     * receives an array of supports (each support corresopnds to the itemset with the same position
+     * in the list of candidatesItemsets) and returns only the frequent itemsets. Therefore it represent
+     * the filter step in the Apriori algorithm.
+     *
+     * @param support
+     */
+    private void filterCandidates(int[] support) {
+        // iterate over the candidates to filter them
+        for(int candidate=0; candidate<support.length; candidate++) {
+            // if the support is greater than the threshold
+            if (support[candidate] >= this.supportThreshold) {
+                // put the itemset int the set of frequent itemsets (the put will overwrite existing values)
+                int[] c = this.candidateItemsets.get(candidate);
+                this.kFrequentItemsets.add(c);
+                this.frequentItemsetSupports.put(Arrays.hashCode(c), support[candidate]);
+            }
+        }
     }
 
     /**
+     * aprioriGen
+     *
+     * generates the candidates
+     *
      * @param oldFrequentItemsets
-     * @return
+     * @return list of candidates
      */
     private List<int[]> aprioriGen(List<int[]> oldFrequentItemsets) {
 
-        // combine
+        // combine and prune
         return Combination.combine(oldFrequentItemsets);
-
-        // prune
-
     }
 
-    public static List findAssosiation(List frequentItemsets) {
+    /**
+     * Find associations, implementation of the fast algorithm found in the paper
+     *
+     * @param frequentItemsets
+     * @return
+     */
+    public List findAssociations(List<int[]> frequentItemsets) {
+        for (int[] itemset: frequentItemsets) {
+
+            if(itemset.length >= 2) {
+                List<int[]> singleConsequents = Combination.combinations(itemset, 1);
+                int itemsetSupport = this.frequentItemsetSupports.get(Arrays.hashCode(itemset));
+                int diffSupport;
+                double confidence;
+                List<int[]> toRemove = new ArrayList<>();
+                for(int[] consequent: singleConsequents) {
+                    int[] diff = Combination.setDifference(consequent, itemset);
+
+                    diffSupport = this.frequentItemsetSupports.get(Arrays.hashCode(diff));
+
+                    confidence = new Double(itemsetSupport) / new Double(diffSupport);
+
+                    if(confidence >= this.minConfidence) {
+                        System.out.println("RULE: "+Arrays.toString(diff)+" => "+Arrays.toString(consequent)+" with conf = "+confidence+" and support= "+itemsetSupport);
+                    } else {
+                        // delete the rule from the set
+                        toRemove.add(consequent);
+                    }
+                }
+                // remove items
+                for(int[] torem: toRemove) {
+                    singleConsequents.remove(torem);
+                }
+                this.findAssociations(itemset, singleConsequents);
+            }
+        }
         return null;
+    }
+
+
+    /**
+     * findAssociations
+     *
+     * inner recursive private method that takes advantenge of the combine function.
+     * @param itemset
+     * @param subset
+     */
+    private void findAssociations(int[] itemset, List<int[]> subset) {
+
+        int itemsetSupport = this.frequentItemsetSupports.get(Arrays.hashCode(itemset));
+        int diffSupport;
+        double confidence;
+        List<int[]> toRemove = new ArrayList<>();
+
+        if(subset.size() > 0 && itemset.length > subset.get(0).length+1) {
+
+            List<int[]> consequents = Combination.combine(subset);
+            for(int[] consequent: consequents) {
+                int[] diff = Combination.setDifference(consequent, itemset);
+
+                diffSupport = this.frequentItemsetSupports.get(Arrays.hashCode(diff));
+
+                confidence = new Double(itemsetSupport) / new Double(diffSupport);
+
+                if(confidence >= this.minConfidence) {
+                    System.out.println("RULE: "+Arrays.toString(diff)+" => "+Arrays.toString(consequent)+" with conf = "+confidence+" and support= "+itemsetSupport);
+                } else {
+                    // delete the rule from the set
+                    toRemove.add(consequent);
+                }
+            }
+            // remove items
+            for(int[] torem: toRemove) {
+                consequents.remove(torem);
+            }
+            findAssociations(itemset, consequents);
+        }
     }
 
 
@@ -252,7 +356,7 @@ public class AprioriAlgorithm {
      * @param info
      * @param toLog
      */
-    public static void log(String info, Object toLog) {
+    private static void log(String info, Object toLog) {
         System.out.println(info);
         System.out.println(toLog);
     }
@@ -263,14 +367,10 @@ public class AprioriAlgorithm {
      * @param info
      * @param toLog
      */
-    public static void logList(String info, List<int[]> toLog) {
+    private static void logList(String info, List<int[]> toLog) {
         System.out.println(info);
         for (int[] item: toLog) {
-            String s = "";
-            for(int i=0; i< item.length; i++) {
-                s += " "+item[i];
-            }
-            System.out.print(s + " | ");
+            System.out.print(Arrays.toString(item));
         }
         System.out.println();
 

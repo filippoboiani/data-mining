@@ -1,7 +1,8 @@
+package main.java;
+
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Main class.
@@ -18,35 +19,42 @@ public class Main {
         // default args
         String fileName = "T10I4D100K.dat";
 
-        // fileName = "T10I4D100K.dat";
 
         /** tresholds as percentages
          * beware that, for example:
          * 500 frequent singletons genrate 124750 candidate doubletons
          */
-        double[] stepThresholds = {0.015}; // 3% (step1) and 0.8% (step n>1) of all the baskets
-        // double[] stepThresholds = {0.02, 0.5};
+        double[] stepThresholds = {0.01}; // 1% (step1) and 1% (step n>1) of all the baskets
+
+        // default minimum confidence
+        double minConfidence = 0.5;
 
         // if wrong args, exit
-        if(args.length>0 && args.length != 2) {
-            System.err.println("Usage: <filename> <threshold>");
+        if(args.length>0 && args.length != 3) {
+            System.err.println("Usage: <filename> <threshold> <min-confidence>");
             System.exit(-1);
         }
 
         // if right args
-        if(args.length==2) {
+        if(args.length==3) {
             fileName = args[0];
             stepThresholds[0] = Double.parseDouble(args[1]);
+            minConfidence = Double.parseDouble(args[2]);
         }
 
         // get the dataset
         File inputFile = new File("input/"+fileName);
         log("ANALYSING FILE", inputFile);
 
+        // start a timer
         long startTime = System.currentTimeMillis();
-        // subproblem 1: find the frequent itemsets
-        List<int []> frequentItemsets = new AprioriAlgorithm(stepThresholds, inputFile).findFrequentItemsets();
 
+        AprioriAlgorithm apriori = new AprioriAlgorithm(stepThresholds, minConfidence, inputFile);
+
+        // subproblem 1: find the frequent itemsets
+        List<int []> frequentItemsets = apriori.findFrequentItemsets();
+
+        // stop the timer
         long endTime   = System.currentTimeMillis();
         double totalTime = (endTime - startTime)/ 1000;
 
@@ -55,10 +63,8 @@ public class Main {
         log("TIME (in sec): ", totalTime);
 
         // subproblem 2: find associations
-        List associations = AprioriAlgorithm.findAssosiation(frequentItemsets);
+        List associations = apriori.findAssociations(frequentItemsets);
 
-        // print the associations
-        log("ASSOCIATIONS FOUND:", "<not implemented>");
     }
 
 
@@ -71,12 +77,10 @@ public class Main {
     public static void log(String info, Object toLog) {
         System.out.println(info);
         System.out.println(toLog);
-
-
     }
 
     /**
-     * utility log method
+     * utility logList method
      *
      * @param info
      * @param toLog
@@ -84,13 +88,8 @@ public class Main {
     public static void logList(String info, List<int[]> toLog) {
         System.out.println(info);
         for (int[] item: toLog) {
-            String s = "";
-            for(int i=0; i< item.length; i++) {
-                s += " "+item[i];
-            }
-            System.out.print(s + " | ");
+            System.out.print(Arrays.toString(item));
         }
         System.out.println();
-
     }
 }

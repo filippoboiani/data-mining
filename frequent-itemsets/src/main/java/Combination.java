@@ -1,3 +1,4 @@
+package main.java;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -17,10 +18,18 @@ public final class Combination {
 
     public Combination() {}
 
+
+    /**
+     * Computation similar to cartesian products between sets.
+     * This method receives a list of frequent k-itemsets and computes the
+     * candidate (k+1)-itemsets.
+     *
+     * @param inputSet
+     * @return
+     */
     public static List<int[]> combine(List<int[]> inputSet) {
 
         List<int[]> result = new ArrayList<>();
-
 
         for(int i=0; i<inputSet.size(); i++) {
             int[] itemsetA = inputSet.get(i);
@@ -46,6 +55,54 @@ public final class Combination {
         return result;
     }
 
+
+    /**
+     *
+     * Computes the differnce between 2 arrays
+     * @param a
+     * @param b
+     * @return
+     */
+    public static int[] setDifference(int[] a, int[] b) {
+        int[] setA; // the small one
+        int[] setB; // the big one
+        int[] diff;
+
+        if (a.length > b.length) {
+            setB = a;
+            setA = b;
+            diff = new int[a.length - b.length];
+        } else {
+            setB = b;
+            setA = a;
+            diff = new int[b.length - a.length];
+        }
+
+        int count;
+        int index = 0;
+        for (int i = 0; i < setB.length; i++) {
+            count = 0;
+            for (int j = 0; j < setA.length; j++) {
+                if ((setB[i] != setA[j])) {
+                    count++;
+
+                }
+                if (count == setA.length) {
+                    diff[index] = setB[i];
+                    index++;
+                }
+            }
+        }
+
+        return diff;
+    }
+
+    /**
+     * generates the combination n over k of a given array of integers of size n.
+     * @param inputSet
+     * @param k
+     * @return
+     */
     public static List<int[]> combinations(int[] inputSet, int k) {
 
         List<int[]> subsets = new ArrayList<>();
@@ -77,7 +134,13 @@ public final class Combination {
         return subsets;
     }
 
-    // generate actual subset by index sequence
+
+    /**
+     * generate actual subset by index sequence
+     * @param input
+     * @param subset
+     * @return
+     */
     private static int[] getSubset(int[] input, int[] subset) {
         int[] result = new int[subset.length];
         for (int i = 0; i < subset.length; i++)
@@ -85,6 +148,15 @@ public final class Combination {
         return result;
     }
 
+
+    /**
+     * Converts a basket into an array of booleans where the true values corresponds to the
+     * items the basket contains
+     *
+     * @param basket
+     * @param numberOfItems
+     * @return
+     */
     public static boolean[] convertToBoolean(int[] basket, int numberOfItems) {
         boolean[] result = new boolean[numberOfItems];
 
