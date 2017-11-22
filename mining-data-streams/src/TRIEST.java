@@ -5,26 +5,26 @@ import java.util.*;
 /**
  * Implementation of the TREIST algorithm - Paper 2
  */
-public class TRIEST {
+public class TRIEST implements TriestIface {
 
     /** size of the sample */
-    private final int maxSampleSize;
+    protected final int maxSampleSize;
 
     /** the stream timestamp */
-    private int timestamp;
+    protected int timestamp;
 
     /** the counter of global and local triangles */
-    private int globalCounter;
-    private HashMap<Integer, Integer> localCounter = null;
+    protected double globalCounter;
+    protected HashMap<Integer, Integer> localCounter = null;
 
     /** the sample set */
-    private HashMap<Integer, int[]> sampleSet = null;
+    protected HashMap<Integer, int[]> sampleSet = null;
 
     /** adjacency list */
-    private HashMap<Integer, Set<Integer>> adjacencyList = null;
+    protected HashMap<Integer, Set<Integer>> adjacencyList = null;
 
     /** biased coin */
-    private enum BiasedCoin {
+    protected enum BiasedCoin {
         /** options */
         HEAD, TAIL;
 
@@ -35,6 +35,20 @@ public class TRIEST {
     }
 
     /** default constructor */
+    public TRIEST() {
+        // init counters
+        this.globalCounter = 0;
+        this.localCounter = new HashMap<>();
+
+        // init sample
+        this.maxSampleSize = 1000;
+        this.sampleSet = new HashMap<>();
+        this.adjacencyList = new HashMap<>();
+
+        // init timestamp
+        this.timestamp = 0;
+    }
+
     public TRIEST(int maxSampleSize) {
         // init counters
         this.globalCounter = 0;
@@ -52,11 +66,12 @@ public class TRIEST {
     public boolean insert(int[] edge) {
 
         timestamp++;
-        if(sampleEdge(edge, timestamp)) {
+        if(reservoirSampleEdge(edge, timestamp)) {
             // add to sample
             addToSample(edge);
             // update the counters
             updateCounters(true, edge);
+            return true;
         }
         return false;
     }
@@ -69,7 +84,7 @@ public class TRIEST {
      * @param timestamp
      * @return
      */
-    private boolean sampleEdge(int[] edge, int timestamp){
+    public boolean reservoirSampleEdge(int[] edge, int timestamp){
 
         // if the number of samples is lower than the max sample size
         if (timestamp < maxSampleSize) {
@@ -92,7 +107,7 @@ public class TRIEST {
     /**
      * @return
      */
-    private int[] pickRandomEdge() {
+    public int[] pickRandomEdge() {
         List<Integer> keysAsArray = new ArrayList<>(sampleSet.keySet());
         Random r = new Random();
 
@@ -104,7 +119,7 @@ public class TRIEST {
      * @param addition boolean value: if true add, remove otherwise
      * @param edge a couple of node ids
      */
-    private void updateCounters(boolean addition, int[] edge) {
+    public void updateCounters(boolean addition, int[] edge) {
 
         // get shared neighbourhood
         Set intersection = new HashSet<>(adjacencyList.get(edge[0]));
@@ -129,7 +144,7 @@ public class TRIEST {
     /**
      * @param edge
      */
-    private void addToSample(int[] edge){
+    public void addToSample(int[] edge){
 
         // add the edge to the sample set
         sampleSet.put(Arrays.hashCode(edge), edge);
@@ -161,7 +176,7 @@ public class TRIEST {
     /**
      * @param edge
      */
-    private void removeFromSample(int[] edge) {
+    public void removeFromSample(int[] edge) {
 
         // remove the edge from the sample set
         sampleSet.remove(Arrays.hashCode(edge));
@@ -174,7 +189,7 @@ public class TRIEST {
         aList.remove(edge[0]);
     }
 
-    public int getGlobalCounter() {
+    public double getGlobalCounter() {
         return globalCounter;
     }
 }
