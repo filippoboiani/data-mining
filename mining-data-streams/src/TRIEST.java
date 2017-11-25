@@ -3,10 +3,10 @@ import java.util.*;
 
 public class TRIEST {
 
-    int m = 1000;
-    int timestamp = 0;
-    Integer totalTriangles = 0;
-    Map<Integer, Integer> triangles = new HashMap();
+    double m = 1000;
+    double timestamp = 0;
+    double totalTriangles = 0;
+    Map<Integer, Double> triangles = new HashMap();
     Map<Integer, ArrayList<Integer>> graphReprensentation = new HashMap<Integer, ArrayList<Integer>>();
     public static int random = 0;
     ArrayList<int[]> edgeList = new ArrayList<int[]>();
@@ -37,16 +37,15 @@ public class TRIEST {
         }
     }
 
-    public boolean sampleEdge(int[] edge, int timestamp) {
+    public boolean sampleEdge(int[] edge, double timestamp) {
         if(timestamp <= m) {
             return true;
-//        } else if (BiasedCoin.flip(1) == BiasedCoin.HEAD) {
         } else if (BiasedCoin.flip(((double)m)/timestamp) == BiasedCoin.HEAD) {
             random++;
 
             int[] randomEdge = pickRandomEdge();
 
-//             remove randomEdge from graphRepresentation
+            // remove randomEdge from graphRepresentation
             removeEdge(randomEdge);
             updateCounters(false, randomEdge);
 
@@ -54,7 +53,6 @@ public class TRIEST {
             return true;
         }
         return false;
-//        return true;
     }
 
     public int[] pickRandomEdge() {
@@ -68,7 +66,7 @@ public class TRIEST {
         edgeList.remove(edge);
     }
 
-    private void addEdgeToGraph(int[] edge) {
+    protected void addEdgeToGraph(int[] edge) {
         ArrayList<Integer>[] edgeNeighborhood = new ArrayList[2];
 
         // Get the neighborhood of the 2 vertex in the edge
@@ -116,11 +114,18 @@ public class TRIEST {
         }
     }
 
-    private ArrayList<Integer> getNeighborhood(int node) {
+    protected ArrayList<Integer> getNeighborhood(int node) {
         return graphReprensentation.containsKey(node) ? graphReprensentation.get(node) : new ArrayList<Integer>();
     }
 
     public int getGlobalCounter() {
-        return totalTriangles;
+        return (int) totalTriangles;
+    }
+
+    public int getEstimation() {
+        double numerator = ( timestamp * (timestamp - 1 ) * (timestamp - 2));
+        double denominator =  (m * (m - 1) * (m - 2));
+
+        return (int) (totalTriangles * Math.max(1.00, numerator/denominator));
     }
 }

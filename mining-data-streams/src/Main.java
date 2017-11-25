@@ -20,8 +20,8 @@ public class Main {
 //        File fileToAnalyse = new File("input/out.actor-collaboration");
 
         // instantiate the algorithm
-        TRIEST triestAlgorithm = new TRIEST(1000000);
-//        TRIEST_IMPR triestAlgorithm = new TRIEST_IMPR(1000);
+//        TRIEST triestAlgorithm = new TRIEST(100000);
+        TRIEST_IMPR triestAlgorithm = new TRIEST_IMPR(10000);
 
         System.out.println("Starting to count...");
 
@@ -41,6 +41,7 @@ public class Main {
         System.out.println("Triangles found: "+globalCount);
         System.out.println("Process Finished after "+totalTime+" seconds.");
 
+        System.out.println("Estimation " + triestAlgorithm.getEstimation());
 
 
     }
