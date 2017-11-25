@@ -1,27 +1,15 @@
 import java.util.*;
 
 
+public class TRIEST {
 
-/**
- * Implementation of the TREIST algorithm - Paper 2
- */
-public class TRIEST implements TriestIface {
-
-    /** size of the sample */
-    protected final int maxSampleSize;
-
-    /** the stream timestamp */
-    protected int timestamp;
-
-    /** the counter of global and local triangles */
-    protected double globalCounter;
-    protected HashMap<Integer, Integer> localCounter = null;
-
-    /** the sample set */
-    protected HashMap<Integer, int[]> sampleSet = null;
-
-    /** adjacency list */
-    protected HashMap<Integer, Set<Integer>> adjacencyList = null;
+    int m = 1000;
+    int timestamp = 0;
+    Integer totalTriangles = 0;
+    Map<Integer, Integer> triangles = new HashMap();
+    Map<Integer, ArrayList<Integer>> graphReprensentation = new HashMap<Integer, ArrayList<Integer>>();
+    public static int random = 0;
+    ArrayList<int[]> edgeList = new ArrayList<int[]>();
 
     /** biased coin */
     protected enum BiasedCoin {
@@ -29,167 +17,96 @@ public class TRIEST implements TriestIface {
         HEAD, TAIL;
 
         /** biased coin flip */
-        static BiasedCoin flip(double bias) {
+        static TRIEST.BiasedCoin flip(double bias) {
             return Math.random()<bias ? HEAD : TAIL;
         }
     }
 
-    /** default constructor */
-    public TRIEST() {
-        // init counters
-        this.globalCounter = 0;
-        this.localCounter = new HashMap<>();
-
-        // init sample
-        this.maxSampleSize = 1000;
-        this.sampleSet = new HashMap<>();
-        this.adjacencyList = new HashMap<>();
-
-        // init timestamp
-        this.timestamp = 0;
+    public TRIEST(int m) {
+        this.m = m;
     }
 
-    public TRIEST(int maxSampleSize) {
-        // init counters
-        this.globalCounter = 0;
-        this.localCounter = new HashMap<>();
-
-        // init sample
-        this.maxSampleSize = maxSampleSize;
-        this.sampleSet = new HashMap<>();
-        this.adjacencyList = new HashMap<>();
-
-        // init timestamp
-        this.timestamp = 0;
-    }
-
-    public boolean insert(int[] edge) {
-
+    public void analyze(boolean addition, int[] edge) {
         timestamp++;
-        if(reservoirSampleEdge(edge, timestamp)) {
-            // add to sample
-            addToSample(edge);
-            // update the counters
+//        System.out.println(timestamp + ") Addition " + addition + "  -  Edge " + edge[0] + " " + edge[1]);
+
+        if (sampleEdge(edge, timestamp)) {
+            // add edge to graph representation
+            addEdgeToGraph(edge);
             updateCounters(true, edge);
-            return true;
         }
-        return false;
     }
 
+    public boolean sampleEdge(int[] edge, int timestamp) {
+//        if(timestamp <= m) {
+//            return true;
+//        } else if (BiasedCoin.flip(((double)m)/timestamp) == BiasedCoin.HEAD) {
+//            random++;
+//
+//            int[] randomEdge = pickRandomEdge();
+//
+////             remove randomEdge from graphRepresentation
+//            removeEdge(randomEdge);
+//            updateCounters(false, randomEdge);
+//            return true;
+//        }
+//        return false;
+        return true;
+    }
 
-    /**
-     *
-     * reservoir sampling part of the algorithm
-     * @param edge
-     * @param timestamp
-     * @return
-     */
-    public boolean reservoirSampleEdge(int[] edge, int timestamp){
+    private void addEdgeToGraph(int[] edge) {
+        ArrayList<Integer>[] edgeNeighborhood = new ArrayList[2];
 
-        // if the number of samples is lower than the max sample size
-        if (timestamp < maxSampleSize) {
-             return true;
-        } else if (BiasedCoin.flip(maxSampleSize/timestamp) == BiasedCoin.HEAD) {
-
-            // pick a random edge from the sample
-            int[] randomEdge = pickRandomEdge();
-
-            // remove the edge from the sample
-            removeFromSample(randomEdge);
-
-            // update counters
-            updateCounters(false, edge);
-            return true;
+        // Get the neighborhood of the 2 vertex in the edge
+        for (int i = 0; i < edgeNeighborhood.length; i++) {
+            edgeNeighborhood[i] = getNeighborhood(edge[i]);
         }
-        return false;
+
+        // add the opposite vertex to each neighborhood
+        edgeNeighborhood[0].add(edge[1]);
+        edgeNeighborhood[1].add(edge[0]);
+
+        // update neighbors in graphRepresentation
+        graphReprensentation.put(edge[0], edgeNeighborhood[0]);
+        graphReprensentation.put(edge[1], edgeNeighborhood[1]);
+
+        edgeList.add(edge);
     }
 
-    /**
-     * @return
-     */
-    public int[] pickRandomEdge() {
-        List<Integer> keysAsArray = new ArrayList<>(sampleSet.keySet());
-        Random r = new Random();
-
-        return sampleSet.get(keysAsArray.get( r.nextInt( keysAsArray.size())));
-    }
-
-    /**
-     * update the triangle counters (both local and global)
-     * @param addition boolean value: if true add, remove otherwise
-     * @param edge a couple of node ids
-     */
     public void updateCounters(boolean addition, int[] edge) {
+        ArrayList<Integer>[] edgeNeighborhood = new ArrayList[2];
 
-        // get shared neighbourhood
-        Set intersection = new HashSet<>(adjacencyList.get(edge[0]));
-        intersection.retainAll(adjacencyList.get(edge[1]));
+        // Get the neighborhood of the 2 vertex in the edge
+        for (int i = 0; i < edgeNeighborhood.length; i++) {
+            edgeNeighborhood[i] = getNeighborhood(edge[i]);
+        }
 
-        // for all common neighbours
-        Iterator intersectionIterator = intersection.iterator();
-        while(intersectionIterator.hasNext()) {
+        // EdgeNeighborhood becomes the "nodes in common" arrayList;
+        ArrayList<Integer> nodesInCommon = new ArrayList<Integer>(edgeNeighborhood[1]);
+        nodesInCommon.retainAll(edgeNeighborhood[0]);
 
-            intersectionIterator.next();
 
-            // update counters
+        for (Integer commonNode : nodesInCommon) {
+
             if (addition) {
-                globalCounter++;
+                totalTriangles++;
+                triangles.put(commonNode, triangles.get(commonNode) == null? 1 : triangles.get(commonNode) + 1);
+                triangles.put(edge[0], triangles.get(edge[0]) == null ? 1 : triangles.get(edge[0])+ 1);
+                triangles.put(edge[1], triangles.get(edge[1]) == null ? 1 : triangles.get(edge[1])+ 1);
             } else {
-                globalCounter--;
-
+                totalTriangles--;
+                triangles.put(commonNode, triangles.get(commonNode) - 1);
+                triangles.put(edge[0], triangles.get(edge[0]) - 1);
+                triangles.put(edge[1], triangles.get(edge[1]) - 1);
             }
         }
     }
 
-    /**
-     * @param edge
-     */
-    public void addToSample(int[] edge){
-
-        // add the edge to the sample set
-        sampleSet.put(Arrays.hashCode(edge), edge);
-
-        // add the connection from the adjacency matrix
-
-        Set<Integer> aList = adjacencyList.get(edge[0]);
-
-        if(aList == null) {
-            Set<Integer> set = new HashSet<>();
-            set.add(edge[1]);
-            adjacencyList.put(edge[0], set);
-        } else {
-            aList.add(edge[1]);
-        }
-
-
-        aList = adjacencyList.get(edge[1]);
-        if(aList == null) {
-            Set<Integer> set = new HashSet<>();
-            set.add(edge[0]);
-            adjacencyList.put(edge[1], set);
-        } else {
-            aList.add(edge[0]);
-        }
-
+    private ArrayList<Integer> getNeighborhood(int node) {
+        return graphReprensentation.containsKey(node) ? graphReprensentation.get(node) : new ArrayList<Integer>();
     }
 
-    /**
-     * @param edge
-     */
-    public void removeFromSample(int[] edge) {
-
-        // remove the edge from the sample set
-        sampleSet.remove(Arrays.hashCode(edge));
-
-        // remove the connection from the adjacency matrix
-        Set<Integer> aList = adjacencyList.get(edge[0]);
-        aList.remove(edge[1]);
-
-        aList = adjacencyList.get(edge[1]);
-        aList.remove(edge[0]);
-    }
-
-    public double getGlobalCounter() {
-        return globalCounter;
+    public int getGlobalCounter() {
+        return totalTriangles;
     }
 }
