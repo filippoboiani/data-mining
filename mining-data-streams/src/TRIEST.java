@@ -38,20 +38,34 @@ public class TRIEST {
     }
 
     public boolean sampleEdge(int[] edge, int timestamp) {
-//        if(timestamp <= m) {
-//            return true;
-//        } else if (BiasedCoin.flip(((double)m)/timestamp) == BiasedCoin.HEAD) {
-//            random++;
-//
-//            int[] randomEdge = pickRandomEdge();
-//
-////             remove randomEdge from graphRepresentation
-//            removeEdge(randomEdge);
-//            updateCounters(false, randomEdge);
-//            return true;
-//        }
-//        return false;
-        return true;
+        if(timestamp <= m) {
+            return true;
+//        } else if (BiasedCoin.flip(1) == BiasedCoin.HEAD) {
+        } else if (BiasedCoin.flip(((double)m)/timestamp) == BiasedCoin.HEAD) {
+            random++;
+
+            int[] randomEdge = pickRandomEdge();
+
+//             remove randomEdge from graphRepresentation
+            removeEdge(randomEdge);
+            updateCounters(false, randomEdge);
+
+
+            return true;
+        }
+        return false;
+//        return true;
+    }
+
+    public int[] pickRandomEdge() {
+        return edgeList.get((int)(Math.random() * edgeList.size()));
+    }
+
+    public void removeEdge(int[] edge) {
+        graphReprensentation.get(new Integer(edge[0])).remove(new Integer(edge[1]));
+        graphReprensentation.get(new Integer(edge[1])).remove(new Integer(edge[0]));
+
+        edgeList.remove(edge);
     }
 
     private void addEdgeToGraph(int[] edge) {

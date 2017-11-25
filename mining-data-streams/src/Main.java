@@ -15,11 +15,12 @@ public class Main {
         int[] elements;
 
         // open the input stream
+//        File fileToAnalyse = new File("input/rrr");
         File fileToAnalyse = new File("input/out.facebook-wosn-links");
 //        File fileToAnalyse = new File("input/out.actor-collaboration");
 
         // instantiate the algorithm
-        TRIEST triestAlgorithm = new TRIEST(1000);
+        TRIEST triestAlgorithm = new TRIEST(1000000);
 //        TRIEST_IMPR triestAlgorithm = new TRIEST_IMPR(1000);
 
         System.out.println("Starting to count...");
@@ -69,7 +70,7 @@ public class Main {
                 elements =  convertLineToArray(br.readLine());
 
                     // feed the algoritm with new input
-                triestAlgorithm.analyze(true, elements);
+                triestAlgorithm.analyze(true, Arrays.copyOfRange(elements, 0, 2));
 
             }
 
