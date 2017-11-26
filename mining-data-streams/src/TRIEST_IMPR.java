@@ -46,25 +46,29 @@ public class TRIEST_IMPR extends TRIEST {
         ArrayList<Integer> nodesInCommon = new ArrayList<Integer>(edgeNeighborhood[1]);
         nodesInCommon.retainAll(edgeNeighborhood[0]);
 
+        double numerator = ((timestamp - 1 ) * (timestamp - 2));
+        double denominator =  (m * (m - 1));
+        double weightedIncrease = Math.max(1.00, numerator/denominator);
 
         for (Integer commonNode : nodesInCommon) {
 
             if (addition) {
-                double numerator = ((timestamp - 1 ) * (timestamp - 2));
-                double denominator =  (m * (m - 1));
 
-                double weightedIncrease = Math.max(1.00, numerator/denominator);
-                totalTriangles++;
+                totalTriangles += weightedIncrease;
                 triangles.put(commonNode, triangles.get(commonNode) == null? weightedIncrease : triangles.get(commonNode) + weightedIncrease);
                 triangles.put(edge[0], triangles.get(edge[0]) == null ? weightedIncrease : triangles.get(edge[0])+ weightedIncrease);
                 triangles.put(edge[1], triangles.get(edge[1]) == null ? weightedIncrease : triangles.get(edge[1])+ weightedIncrease);
             } else {
-                totalTriangles--;
-                triangles.put(commonNode, triangles.get(commonNode) - 1);
-                triangles.put(edge[0], triangles.get(edge[0]) - 1);
-                triangles.put(edge[1], triangles.get(edge[1]) - 1);
+                totalTriangles -= weightedIncrease;
+                triangles.put(commonNode, triangles.get(commonNode) - weightedIncrease);
+                triangles.put(edge[0], triangles.get(edge[0]) - weightedIncrease);
+                triangles.put(edge[1], triangles.get(edge[1]) - weightedIncrease);
             }
         }
+    }
+
+    public int getEstimation() {
+        return (int) this.totalTriangles;
     }
 
 }

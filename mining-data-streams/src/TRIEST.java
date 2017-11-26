@@ -1,15 +1,33 @@
 import java.util.*;
 
 
+/**
+ * TRIEST algorithm.
+ *
+ * Count triangles in a graph provided as stream of edges
+ */
 public class TRIEST {
 
-    double m = 1000;
+    /** the sample size */
+    double m = 100000;
+
+    /** time */
     double timestamp = 0;
+
+    /** global counter */
     double totalTriangles = 0;
-    Map<Integer, Double> triangles = new HashMap();
-    Map<Integer, ArrayList<Integer>> graphReprensentation = new HashMap<Integer, ArrayList<Integer>>();
+
+    /** local counters */
+    protected final Map<Integer, Double> triangles = new HashMap();
+
+    /** adjacency lists */
+    protected final Map<Integer, ArrayList<Integer>> graphReprensentation = new HashMap<Integer, ArrayList<Integer>>();
+
+    /** random value */
     public static int random = 0;
-    ArrayList<int[]> edgeList = new ArrayList<int[]>();
+
+    /** list of edges in the sample */
+    protected final ArrayList<int[]> edgeList = new ArrayList<int[]>();
 
     /** biased coin */
     protected enum BiasedCoin {
@@ -22,10 +40,21 @@ public class TRIEST {
         }
     }
 
+
+    /**
+     * constructor
+     * @param m
+     */
     public TRIEST(int m) {
         this.m = m;
     }
 
+
+    /**
+     * insert or delete edge from the graph (i.e. from the sample)
+     * @param addition
+     * @param edge
+     */
     public void analyze(boolean addition, int[] edge) {
         timestamp++;
 //        System.out.println(timestamp + ") Addition " + addition + "  -  Edge " + edge[0] + " " + edge[1]);
@@ -33,32 +62,52 @@ public class TRIEST {
         if (sampleEdge(edge, timestamp)) {
             // add edge to graph representation
             addEdgeToGraph(edge);
+            // update gloabal and local counters
             updateCounters(true, edge);
         }
     }
 
+
+    /**
+     * reservoir sampling implementation
+     * @param edge
+     * @param timestamp
+     * @return
+     */
     public boolean sampleEdge(int[] edge, double timestamp) {
         if(timestamp <= m) {
             return true;
         } else if (BiasedCoin.flip(((double)m)/timestamp) == BiasedCoin.HEAD) {
             random++;
 
+            // pick a random edge
             int[] randomEdge = pickRandomEdge();
 
             // remove randomEdge from graphRepresentation
             removeEdge(randomEdge);
-            updateCounters(false, randomEdge);
 
+            // update the counters
+            updateCounters(false, randomEdge);
 
             return true;
         }
         return false;
     }
 
+
+    /**
+     * pick a random edge from the sample
+     * @return
+     */
     public int[] pickRandomEdge() {
         return edgeList.get((int)(Math.random() * edgeList.size()));
     }
 
+
+    /**
+     * remove an edge from the sample
+     * @param edge
+     */
     public void removeEdge(int[] edge) {
         graphReprensentation.get(new Integer(edge[0])).remove(new Integer(edge[1]));
         graphReprensentation.get(new Integer(edge[1])).remove(new Integer(edge[0]));
@@ -66,6 +115,13 @@ public class TRIEST {
         edgeList.remove(edge);
     }
 
+
+    /**
+     * add edge to the graph representation.
+     * Update the adjacency lists
+     *
+     * @param edge
+     */
     protected void addEdgeToGraph(int[] edge) {
         ArrayList<Integer>[] edgeNeighborhood = new ArrayList[2];
 
@@ -85,6 +141,12 @@ public class TRIEST {
         edgeList.add(edge);
     }
 
+
+    /**
+     * update local and global counters
+     * @param addition
+     * @param edge
+     */
     public void updateCounters(boolean addition, int[] edge) {
         ArrayList<Integer>[] edgeNeighborhood = new ArrayList[2];
 
@@ -98,6 +160,7 @@ public class TRIEST {
         nodesInCommon.retainAll(edgeNeighborhood[0]);
 
 
+        // for each neighbours update the counters
         for (Integer commonNode : nodesInCommon) {
 
             if (addition) {
@@ -114,14 +177,30 @@ public class TRIEST {
         }
     }
 
+
+    /**
+     * get neighbours of a vertex
+     * @param node
+     * @return list of neighbours
+     */
     protected ArrayList<Integer> getNeighborhood(int node) {
         return graphReprensentation.containsKey(node) ? graphReprensentation.get(node) : new ArrayList<Integer>();
     }
 
+
+    /**
+     * get the global counter
+     * @return global counter
+     */
     public int getGlobalCounter() {
         return (int) totalTriangles;
     }
 
+
+    /**
+     * get the estimated triangle count
+     * @return numer of triangles
+     */
     public int getEstimation() {
         double numerator = ( timestamp * (timestamp - 1 ) * (timestamp - 2));
         double denominator =  (m * (m - 1) * (m - 2));

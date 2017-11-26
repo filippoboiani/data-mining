@@ -13,15 +13,26 @@ public class Main {
     public static void main(String[] args) {
 
         int[] elements;
-
-        // open the input stream
-//        File fileToAnalyse = new File("input/rrr");
+        int sampleSize = 150000;
         File fileToAnalyse = new File("input/out.facebook-wosn-links");
-//        File fileToAnalyse = new File("input/out.actor-collaboration");
+
+        // if wrong args, exit
+        if(args.length>0 && args.length != 2) {
+            System.err.println("Usage: <filename> <threshold> <min-confidence>");
+            System.exit(-1);
+        }
+
+        // if right args
+        if(args.length==2) {
+            fileToAnalyse = new File("input/"+args[0]);
+            sampleSize = Integer.parseInt(args[1]);
+        }
+
+
 
         // instantiate the algorithm
-//        TRIEST triestAlgorithm = new TRIEST(100000);
-        TRIEST_IMPR triestAlgorithm = new TRIEST_IMPR(10000);
+        TRIEST triestAlgorithm = new TRIEST(sampleSize);
+        // TRIEST_IMPR triestAlgorithm = new TRIEST_IMPR(sampleSize);
 
         System.out.println("Starting to count...");
 
@@ -38,7 +49,7 @@ public class Main {
         // when the input has finished you can read the values
         double globalCount = triestAlgorithm.getGlobalCounter();
 
-        System.out.println("Triangles found: "+globalCount);
+        //System.out.println("Triangles found: "+globalCount);
         System.out.println("Process Finished after "+totalTime+" seconds.");
 
         System.out.println("Estimation " + triestAlgorithm.getEstimation());
@@ -67,10 +78,10 @@ public class Main {
 
             while(br.ready()) {
                 limit++;
-                    // read the new input
+                // read the new input
                 elements =  convertLineToArray(br.readLine());
 
-                    // feed the algoritm with new input
+                // feed the algoritm with new input
                 triestAlgorithm.analyze(true, Arrays.copyOfRange(elements, 0, 2));
 
             }
