@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="mining-data-streams">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/mining-data-streams/out/artifacts/mining_data_streams_jar/mining-data-streams.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -18,7 +18,7 @@ def print_edges(edges):
     plt.matshow(A)
     plt.show()
 
-path = "./../input/example1.dat"
+path = "./../../input/example1.dat"
 number_of_clusters = 4
 
 # Read file

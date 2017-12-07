@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/data-mining.iml" filepath="$PROJECT_DIR$/.idea/data-mining.iml" />
+      <module fileurl="file://$PROJECT_DIR$/frequent-itemsets/frequent-itemsets.iml" filepath="$PROJECT_DIR$/frequent-itemsets/frequent-itemsets.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mining-data-streams/mining-data-streams.iml" filepath="$PROJECT_DIR$/mining-data-streams/mining-data-streams.iml" />
     </modules>
   </component>
 </project>

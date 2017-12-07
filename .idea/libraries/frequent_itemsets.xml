@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="frequent-itemsets">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/frequent-itemsets/out/artifacts/frequent_itemsets_jar/frequent-itemsets.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
