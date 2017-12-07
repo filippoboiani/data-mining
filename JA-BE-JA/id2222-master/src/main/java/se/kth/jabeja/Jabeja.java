@@ -109,10 +109,19 @@ public class Jabeja {
         int qCandidateDegree = getDegree(nodeq, nodep.getColor());
         double candidateEnergy = Math.pow(pCandidateDegree, config.getAlpha()) + Math.pow(qCandidateDegree, config.getAlpha());
 
-        if ( ((candidateEnergy * T) > oldEnergy) && (candidateEnergy > highestBenefit) ) {
+
+        boolean acceptance = false;
+        if (config.getCustomAcceptance()) {
+            acceptance = Math.exp((candidateEnergy - oldEnergy) / T) > Math.random();
+        } else {
+            acceptance = ((candidateEnergy * T) > oldEnergy) && (candidateEnergy > highestBenefit);
+        }
+
+        if ( acceptance ) {
             bestPartner = nodeq;
             highestBenefit = candidateEnergy;
         }
+
     }
 
     return bestPartner;

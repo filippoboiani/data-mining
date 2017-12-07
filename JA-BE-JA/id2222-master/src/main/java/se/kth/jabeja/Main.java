@@ -28,6 +28,8 @@ public class Main {
     private void startApp(String[] args) throws IOException {
         config = (new CLI()).parseArgs(args);
 
+        config.setCustomAcceptance(true);
+
         //set seed for the application
         //Note for the results to be deterministic use
         //only one random generator.

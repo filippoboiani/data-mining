@@ -7,6 +7,7 @@ public class Config {
   private Float temperature;
   private Float delta;
   private Integer seed;
+  private Boolean customAcceptance;
   private Integer uniformRandomSampleSize;
   private String graphFile;
   private String outputDir;
@@ -16,6 +17,11 @@ public class Config {
 
   public Config setAlpha(Float alpha) {
     this.alpha = alpha;
+    return this;
+  }
+
+  public Config setCustomAcceptance(Boolean customAcceptance) {
+    this.customAcceptance = customAcceptance;
     return this;
   }
 
@@ -72,6 +78,13 @@ public class Config {
   public Config setUniformRandSampleSize(Integer rnd_list_size) {
     this.uniformRandomSampleSize = rnd_list_size;
     return this;
+  }
+
+  public Boolean getCustomAcceptance() {
+    if (customAcceptance == null) {
+      throw new NullPointerException("Custom acceptance is not set");
+    }
+    return customAcceptance;
   }
 
   public Integer getNumPartitions() {
