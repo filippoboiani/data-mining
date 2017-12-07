@@ -98,7 +98,7 @@ public class Jabeja {
     Node bestPartner = null;
     double highestBenefit = 0;
 
-    // TODO
+    // TODONE
     for (Integer q : nodes) {
         Node nodeq = entireGraph.get(q);
         int pCurrentDegree = getDegree(nodep, nodep.getColor());
