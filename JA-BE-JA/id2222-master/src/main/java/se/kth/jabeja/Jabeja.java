@@ -46,18 +46,29 @@ public class Jabeja {
   }
 
   /**
-   * Simulated analealing cooling function
+   * Simulated annealing cooling function
    */
   private void saCoolDown(){
     // TODO for second task
-    if (T > 1)
-      T -= config.getDelta();
-    if (T < 1)
-      T = 1;
+    if (config.getImprovedAcceptance()) {
+
+      float T_min = 0.00001f;
+      T *= config.getDelta();
+      if (T < T_min)
+        T = T_min;
+
+    } else {
+
+      if (T > 1)
+        T -= config.getDelta();
+      if (T < 1)
+        T = 1;
+    }
+
   }
 
   /**
-   * Sample and swap algorith at node p
+   * Sample and swap function at node p
    * @param nodeId
    */
   private void sampleAndSwap(int nodeId) {
@@ -75,18 +86,22 @@ public class Jabeja {
             || config.getNodeSelectionPolicy() == NodeSelectionPolicy.RANDOM) {
         // if local policy fails then randomly sample the entire graph
         // TODONE
-        partner = findPartner(nodeId, getSample(nodeId));
+        if (partner == null) {
+            partner = findPartner(nodeId, getSample(nodeId));
+        }
     }
 
     // swap the colors
     // TODONE
     if (partner != null) {
+        // color exchange between p and partner
         int benchColor = nodep.getColor();
         nodep.setColor(partner.getColor());
         partner.setColor(benchColor);
         numberOfSwaps++;
     }
 
+    // lower the temperature
     saCoolDown();
 
   }
@@ -111,17 +126,16 @@ public class Jabeja {
 
 
         boolean acceptance = false;
-        if (config.getCustomAcceptance()) {
+        if (config.getImprovedAcceptance()) {
             acceptance = Math.exp((candidateEnergy - oldEnergy) / T) > Math.random();
         } else {
             acceptance = ((candidateEnergy * T) > oldEnergy) && (candidateEnergy > highestBenefit);
         }
 
-        if ( acceptance ) {
+        if (acceptance) {
             bestPartner = nodeq;
             highestBenefit = candidateEnergy;
         }
-
     }
 
     return bestPartner;

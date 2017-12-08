@@ -22,6 +22,9 @@ public class CLI {
   @Option(name = "-rounds", usage = "Number of rounds.")
   private int ROUNDS = 1000;
 
+  @Option(name = "-improvedAcceptance", usage = "Use a different acceptance function.")
+  private boolean IMPROVED_ACCEPTANCE = false;
+
   @Option(name = "-numPartitions", usage = "Number of partitions.")
   private int NUM_PARTITIONS = 4;
 
@@ -99,8 +102,14 @@ public class CLI {
       System.exit(0);
     }
 
+    logger.info("DELTA: "+DELTA);
+    logger.info("IA: "+IMPROVED_ACCEPTANCE);
+    logger.info("ALPHA: "+ALPHA);
+    logger.info("TEMPERATURE: "+TEMPERATURE);
+
     return new Config().setRandNeighborsSampleSize(randNeighborsSampleSize)
             .setDelta(DELTA)
+            .setImprovedAcceptance(IMPROVED_ACCEPTANCE)
             .setNumPartitions(NUM_PARTITIONS)
             .setUniformRandSampleSize(UNIFORM_RAND_SAMPLE_SIZE)
             .setRounds(ROUNDS)
