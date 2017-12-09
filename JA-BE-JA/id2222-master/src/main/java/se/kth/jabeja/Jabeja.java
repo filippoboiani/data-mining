@@ -49,20 +49,32 @@ public class Jabeja {
    * Simulated annealing cooling function
    */
   private void saCoolDown(){
-    // TODO for second task
+
+    // Logarithmic annealing
     if (config.getImprovedAcceptance()) {
 
       float T_min = 0.00001f;
+      // here hte delta is multiplied
       T *= config.getDelta();
       if (T < T_min)
         T = T_min;
 
     } else {
-
+      // linear annealing
       if (T > 1)
         T -= config.getDelta();
       if (T < 1)
         T = 1;
+
+      // extra annealing for task 2.2
+      if (config.getExtra()) {
+        // reset the temperature back to the start after it has cooled down
+        int roundToConverge = (int) (T / config.getDelta());
+        if (T== 1 && round%roundToConverge == 2) {
+          T = config.getTemperature();
+        }
+      }
+
     }
 
   }
@@ -118,23 +130,23 @@ public class Jabeja {
         Node nodeq = entireGraph.get(q);
         int pCurrentDegree = getDegree(nodep, nodep.getColor());
         int qCurrentDegree = getDegree(nodeq, nodeq.getColor());
-        double oldEnergy = Math.pow(pCurrentDegree, config.getAlpha()) + Math.pow(qCurrentDegree, config.getAlpha());
+        double oldColorQuantity = Math.pow(pCurrentDegree, config.getAlpha()) + Math.pow(qCurrentDegree, config.getAlpha());
 
         int pCandidateDegree = getDegree(nodep, nodeq.getColor());
         int qCandidateDegree = getDegree(nodeq, nodep.getColor());
-        double candidateEnergy = Math.pow(pCandidateDegree, config.getAlpha()) + Math.pow(qCandidateDegree, config.getAlpha());
+        double newColorQuantity = Math.pow(pCandidateDegree, config.getAlpha()) + Math.pow(qCandidateDegree, config.getAlpha());
 
 
         boolean acceptance = false;
         if (config.getImprovedAcceptance()) {
-            acceptance = Math.exp((candidateEnergy - oldEnergy) / T) > Math.random();
+            acceptance = Math.exp((newColorQuantity - oldColorQuantity) / T) > Math.random();
         } else {
-            acceptance = ((candidateEnergy * T) > oldEnergy) && (candidateEnergy > highestBenefit);
+            acceptance = ((newColorQuantity * T) > oldColorQuantity) && (newColorQuantity > highestBenefit);
         }
 
         if (acceptance) {
             bestPartner = nodeq;
-            highestBenefit = candidateEnergy;
+            highestBenefit = newColorQuantity;
         }
     }
 

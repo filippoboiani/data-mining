@@ -25,6 +25,9 @@ public class CLI {
   @Option(name = "-improvedAcceptance", usage = "Use a different acceptance function.")
   private boolean IMPROVED_ACCEPTANCE = false;
 
+  @Option(name = "-extra", usage = "Use extra annealing steps (it doesn't work with improved accepatance.")
+  private boolean EXTRA_ANNEALING = false;
+
   @Option(name = "-numPartitions", usage = "Number of partitions.")
   private int NUM_PARTITIONS = 4;
 
@@ -110,6 +113,7 @@ public class CLI {
     return new Config().setRandNeighborsSampleSize(randNeighborsSampleSize)
             .setDelta(DELTA)
             .setImprovedAcceptance(IMPROVED_ACCEPTANCE)
+            .setExtra(EXTRA_ANNEALING)
             .setNumPartitions(NUM_PARTITIONS)
             .setUniformRandSampleSize(UNIFORM_RAND_SAMPLE_SIZE)
             .setRounds(ROUNDS)

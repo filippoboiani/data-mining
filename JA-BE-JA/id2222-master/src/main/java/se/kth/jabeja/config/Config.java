@@ -8,6 +8,7 @@ public class Config {
   private Float delta;
   private Integer seed;
   private Boolean improvedAcceptance;
+  private Boolean extraAnnealing;
   private Integer uniformRandomSampleSize;
   private String graphFile;
   private String outputDir;
@@ -22,6 +23,11 @@ public class Config {
 
   public Config setImprovedAcceptance(Boolean improvedAcceptance) {
     this.improvedAcceptance = improvedAcceptance;
+    return this;
+  }
+
+  public Config setExtra(Boolean extraAnnealing) {
+    this.extraAnnealing = extraAnnealing;
     return this;
   }
 
@@ -86,6 +92,14 @@ public class Config {
     }
     return improvedAcceptance;
   }
+
+  public Boolean getExtra() {
+    if (extraAnnealing == null) {
+      throw new NullPointerException("Custom extra annealing round is not set");
+    }
+    return extraAnnealing;
+  }
+
 
   public Integer getNumPartitions() {
     if (numPartitions == null) {
@@ -174,5 +188,6 @@ public class Config {
   public Config createJabejaConfig() {
     return new Config();
   }
+
 
 }
