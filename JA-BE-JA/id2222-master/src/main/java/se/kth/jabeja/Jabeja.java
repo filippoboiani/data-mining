@@ -60,7 +60,7 @@ public class Jabeja {
         T = T_min;
 
     } else {
-      // linear annealing
+      // linear annealing (original Ja-Be-Ja annealing cooling)
       if (T > 1)
         T -= config.getDelta();
       if (T < 1)
@@ -69,14 +69,15 @@ public class Jabeja {
       // extra annealing for task 2.2
       if (config.getExtra()) {
         // reset the temperature back to the start after it has cooled down
-        int roundToConverge = (int) (T / config.getDelta());
-        if (T== 1 && round%roundToConverge == 2) {
+
+        // int roundsToZero = (int) (T / config.getDelta());
+        int trigger = 400;
+
+        if (T == 1 && round % trigger == 0) {
           T = config.getTemperature();
         }
       }
-
     }
-
   }
 
   /**
