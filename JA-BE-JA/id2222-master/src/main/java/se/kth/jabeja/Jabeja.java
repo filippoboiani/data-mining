@@ -146,6 +146,9 @@ public class Jabeja {
         }
 
         if (acceptance) {
+            if(T<=1) {
+              T = T*config.getRecoil();
+            }
             bestPartner = nodeq;
             highestBenefit = newColorQuantity;
         }
@@ -289,7 +292,8 @@ public class Jabeja {
             "RNSS" + "_" + config.getRandomNeighborSampleSize() + "_" +
             "URSS" + "_" + config.getUniformRandomSampleSize() + "_" +
             "A" + "_" + config.getAlpha() + "_" +
-            "R" + "_" + config.getRounds() + ".txt";
+            "R" + "_" + config.getRounds() + "_" +
+            "RECOIL_" + config.getRecoil() + ".txt";
 
     if (!resultFileCreated) {
       File outputDir = new File(config.getOutputDir());

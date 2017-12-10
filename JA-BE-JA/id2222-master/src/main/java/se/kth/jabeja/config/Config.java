@@ -15,9 +15,15 @@ public class Config {
   private GraphInitColorPolicy initColorPolicy;
   private NodeSelectionPolicy nodeSelectionPolicy;
   private Float alpha;
+  private Float recoil;
 
   public Config setAlpha(Float alpha) {
     this.alpha = alpha;
+    return this;
+  }
+
+  public Config setRecoil(Float recoil) {
+    this.recoil = recoil;
     return this;
   }
 
@@ -91,6 +97,13 @@ public class Config {
       throw new NullPointerException("Custom acceptance is not set");
     }
     return improvedAcceptance;
+  }
+
+  public Float getRecoil() {
+    if (rounds == null) {
+      throw new NullPointerException("Recoil is not set");
+    }
+    return recoil;
   }
 
   public Boolean getExtra() {

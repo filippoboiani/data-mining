@@ -25,6 +25,9 @@ public class CLI {
   @Option(name = "-improvedAcceptance", usage = "Use a different acceptance function.")
   private boolean IMPROVED_ACCEPTANCE = false;
 
+  @Option(name= "-recoil", usage = "Set a recoil that is triggered when T >= 1 and there is a swap")
+  private float RECOIL = 1f;
+
   @Option(name = "-extra", usage = "Use extra annealing steps (it doesn't work with improved accepatance.")
   private boolean EXTRA_ANNEALING = false;
 
@@ -123,6 +126,7 @@ public class CLI {
             .setNodeSelectionPolicy(nodeSelectionPolicy)
             .setGraphInitialColorPolicy(graphInitColorSelectionPolicy)
             .setOutputDir(OUTPUT_DIR)
-            .setAlpha(ALPHA);
+            .setAlpha(ALPHA)
+            .setRecoil(RECOIL);
   }
 }
